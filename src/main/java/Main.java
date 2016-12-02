@@ -22,12 +22,13 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args){
-        clarifaiEngin(Constant.SAMPLE_IMAGE);
-        imaggaEngin(Constant.SAMPLE_IMAGE);
+        //clarifaiEngine(Constant.SAMPLE_IMAGE);
+        //imaggaEngine(Constant.SAMPLE_IMAGE);
+        eighthBitEngine(Constant.SAMPLE_IMAGE);
     }
 
 
-    public static void clarifaiEngin(String url){
+    public static void clarifaiEngine(String url){
 
         final ClarifaiClient client =
                 new ClarifaiBuilder(Constant.CLARIFAI_CLIENT_ID, Constant.CLARIFAI_CLIENT_SECRET).buildSync();
@@ -37,12 +38,12 @@ public class Main {
                                 ClarifaiInput.forImage(ClarifaiImage.of(url))
                         ).executeAsync(new ClarifaiRequest.Callback<List<ClarifaiOutput<Concept>>>() {
                     public void onClarifaiResponseSuccess(List<ClarifaiOutput<Concept>> clarifaiOutputs) {
-                        System.out.println("CLARIFAI ENGIN :");
+                        System.out.println("CLARIFAI Engine :");
 
-                        List<Concept> concepts=clarifaiOutputs.get(0).data();
+                        List<Concept> concepts = clarifaiOutputs.get(0).data();
 
-                        for(Concept c:concepts){
-                            System.out.println("name: "+c.name()+" value:"+c.value());
+                        for (Concept c : concepts) {
+                            System.out.println("name: " + c.name() + " value:" + c.value());
                         }
                     }
 
@@ -56,7 +57,7 @@ public class Main {
                 });
     }
 
-    public static void imaggaEngin(String url){
+    public static void imaggaEngine(String url){
 
          Unirest.get("https://api.imagga.com/v1/tagging")
                 .queryString("url", url)
@@ -64,12 +65,12 @@ public class Main {
                 .header("Accept", "application/json")
                 .asJsonAsync(new Callback<JsonNode>() {
                     public void completed(HttpResponse<JsonNode> httpResponse) {
-                        System.out.println("IMAGGA ENGIN :");
-                        JSONObject object=httpResponse.getBody().getObject();
-                        JSONArray tags=object.getJSONArray("results").getJSONObject(0).getJSONArray("tags");
+                        System.out.println("IMAGGA Engine :");
+                        JSONObject object = httpResponse.getBody().getObject();
+                        JSONArray tags = object.getJSONArray("results").getJSONObject(0).getJSONArray("tags");
 
-                        for(int i=0;i<tags.length();i++){
-                            System.out.println("name: "+tags.getJSONObject(i).get("tag")+" value:"+(tags.getJSONObject(i).getDouble("confidence")/100));
+                        for (int i = 0; i < tags.length(); i++) {
+                            System.out.println("name: " + tags.getJSONObject(i).get("tag") + " value:" + (tags.getJSONObject(i).getDouble("confidence") / 100));
                         }
 
                     }
@@ -82,5 +83,33 @@ public class Main {
 
                     }
                 });
+    }
+
+    private static void eighthBitEngine(String url){
+        Unirest.post("http://api.8bit.ai/tag")
+                .field("url", url)
+                .field("modelkey", "object")
+                .field("lang", "eng")
+                .field("apikey", Constant.EIGHTBIT_APIKEY)
+                .asJsonAsync(new Callback<JsonNode>() {
+                    public void completed(HttpResponse<JsonNode> httpResponse) {
+                        JSONObject j = httpResponse.getBody().getObject();
+                        JSONArray ja = j.getJSONArray("results");
+                        System.out.println("8BIT Engine:");
+                        for (int i = 0; i < ja.length(); i++) {
+                            System.out.println("name: " + ja.getJSONObject(i).getString("tag") + " value:" + ja.getJSONObject(i).getDouble("score"));
+                        }
+                    }
+
+                    public void failed(UnirestException e) {
+                        e.printStackTrace();
+                    }
+
+                    public void cancelled() {
+                        System.out.println(" 8bit engine cancelled");
+                    }
+                });
+
+
     }
 }
