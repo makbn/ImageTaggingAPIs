@@ -13,7 +13,9 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -21,17 +23,30 @@ import java.util.List;
  * Created by white on 2016-11-27.
  */
 public class Main {
-
+    public static BufferedWriter writer;
     public static void main(String[] args) throws Exception {
+        File m=new File("C:\\Java\\m");
+        final File log=new File("C:\\Java\\Log.txt");
 
-        UploadHandler.getInstance().asyncBatchUpload(new File("Images_Dir"), new ResponseHandler() {
-            public void onUploadResponse(String name, String url) {
-
-            }
-        });
-        clarifaiEngine(Constant.SAMPLE_IMAGE);
+        if(!log.exists()){
+            log.createNewFile();
+        }
+        writer = new BufferedWriter(new FileWriter(log,true));
+        if(m.exists()) {
+            UploadHandler.getInstance().asyncBatchUpload(m, new ResponseHandler() {
+                public void onUploadResponse(String name, String url) {
+                    try {
+                        writer.write(name+":"+url+"\n");
+                        writer.flush();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+        /*clarifaiEngine(Constant.SAMPLE_IMAGE);
         imaggaEngine(Constant.SAMPLE_IMAGE);
-        eighthBitEngine(Constant.SAMPLE_IMAGE);
+        eighthBitEngine(Constant.SAMPLE_IMAGE);*/
     }
 
 

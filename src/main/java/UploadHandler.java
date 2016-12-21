@@ -28,13 +28,14 @@ public class UploadHandler {
     }
 
     public void asyncSingleUpload(final File file , final ResponseHandler responseHandler){
-        t=new Thread();
         r=new Runnable() {
             public void run() {
                 Map map=upload(file);
                 responseHandler.onUploadResponse(file.getName(),(String)map.get("url"));
             }
         };
+        t=new Thread(r);
+        t.start();
 
     }
 
